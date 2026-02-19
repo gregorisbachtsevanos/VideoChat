@@ -1,190 +1,199 @@
-# AutoTimer — Automatic Desktop Activity Tracker
+# AutoTimer — Automatic Desktop Activity Tracker (SQLite Edition)
 
-AutoTimer is a lightweight cross-platform desktop activity tracker that automatically records how much time you spend on applications and websites by monitoring the active window on your system.
+AutoTimer is a lightweight cross-platform background activity tracker that automatically records how much time you spend on applications and websites by monitoring the active window on your system.
 
-The app runs in the background, detects window changes, and stores activity durations in a JSON file for later analysis.
-
----
-
-## Features
-
-* Automatic active window tracking
-* Website detection when using Google Chrome
-* Cross-platform support (Windows, macOS, Linux)
-* Persistent activity storage using JSON
-* Object-oriented data model
-* Continuous background monitoring
-* Per-activity time breakdown (days, hours, minutes, seconds)
+This version introduces **professional upgrades** including SQLite storage, idle detection, improved Linux reliability, and daemon-style execution.
 
 ---
 
-## Project Structure
+# Features
+
+✅ Automatic active window tracking
+✅ Idle detection (keyboard + mouse inactivity)
+✅ SQLite database storage (safe & scalable)
+✅ Cross-platform support (Windows, macOS, Linux)
+✅ Background daemon loop
+✅ Reliable Linux window detection
+✅ Per-activity time tracking with precise durations
+✅ Crash-safe persistence
+
+---
+
+# Project Structure
 
 ```
 project/
 │
-├── autotimer.py        # Main tracking loop
-├── activity.py         # Data models & JSON serialization
-├── linux.py            # Linux window detection support
-├── activities.json     # Generated activity data
+├── autotimer.py        # Main tracking engine (daemon loop)
+├── activity.py         # SQLite database layer
+├── linux.py            # Linux window detection
+├── activities.db       # Auto-generated SQLite database
 └── README.md
 ```
 
 ---
 
-## ⚙️ How It Works
+# How It Works
 
-1. The app continuously checks the active window every second.
-2. When a window change is detected:
+1. The app checks the active window every second.
+2. Idle time is calculated using OS input detection.
+3. When a window change occurs:
 
    * The previous activity is closed
-   * A time entry is created
-   * The entry is added to the corresponding activity
-3. Activities are stored in `activities.json`.
-
-If Google Chrome is active, the app extracts the domain from the current tab and tracks time per website.
+   * A time entry is stored in SQLite
+4. If inactivity exceeds the idle threshold → activity becomes **Idle**
 
 ---
 
-## Data Model
+# Database Schema
 
-### ActivityList
+### activities
 
-* Stores all activities
-* Handles JSON loading and saving
+| column | type    |
+| ------ | ------- |
+| id     | INTEGER |
+| name   | TEXT    |
 
-### Activity
+### time_entries
 
-* Represents a tracked app or website
-* Contains multiple time entries
-
-### TimeEntry
-
-* Start time
-* End time
-* Computed duration breakdown
+| column      | type    |
+| ----------- | ------- |
+| id          | INTEGER |
+| activity_id | INTEGER |
+| start_time  | TEXT    |
+| end_time    | TEXT    |
+| seconds     | INTEGER |
 
 ---
 
-## Installation
+# Installation
 
-### 1. Clone repository
+## Clone repository
 
 ```
 git clone <repo-url>
 cd <repo-folder>
 ```
 
-### 2. Install dependencies
+---
+
+## Platform Requirements
+
+### Linux
 
 ```
-pip install python-dateutil
+sudo apt install x11-utils xprintidle
 ```
 
-### 3. Platform-specific requirements
-
-#### Windows
+### Windows
 
 ```
-pip install pywin32 uiautomation
+pip install pywin32
 ```
 
-#### macOS
-
-Requires:
-
-* PyObjC
-* AppleScript permissions
-
-#### Linux
-
-Requires:
+### macOS
 
 ```
-xprop
-```
-
-Install via:
-
-```
-sudo apt install x11-utils
+pip install pyobjc
 ```
 
 ---
 
-## Usage
+# Usage
 
-Run:
+Run tracker:
 
 ```
 python autotimer.py
 ```
 
-Stop with:
+Stop:
 
 ```
 CTRL + C
 ```
 
-Activity data will be saved automatically.
+Database file (`activities.db`) will be created automatically.
 
 ---
 
-## Example JSON Output
+# Run as Background Service
 
-```json
-{
-  "activities": [
-    {
-      "name": "YouTube",
-      "time_entries": [
-        {
-          "start_time": "2026-02-19 10:00:00",
-          "end_time": "2026-02-19 10:30:00",
-          "days": 0,
-          "hours": 0,
-          "minutes": 30,
-          "seconds": 0
-        }
-      ]
-    }
-  ]
-}
+### Linux
+
+```
+nohup python autotimer.py &
+```
+
+### Windows
+
+```
+pythonw autotimer.py
 ```
 
 ---
 
-## Known Limitations
+# Idle Detection
 
-* No idle detection
+Idle detection measures keyboard and mouse inactivity.
+
+Default threshold:
+
+```
+IDLE_LIMIT = 60 seconds
+```
+
+If exceeded → activity recorded as **Idle**.
+
+You can modify this value in `autotimer.py`.
+
+---
+
+# Major Improvements Over Previous Version
+
+| Feature              | Old Version        | New Version        |
+| -------------------- | ------------------ | ------------------ |
+| Storage              | JSON               | SQLite             |
+| Idle detection       | X                  | ✓                  |
+| Linux reliability    | Fragile            | Robust             |
+| Background execution | Partial            | Native daemon loop |
+| Data safety          | Risk of corruption | ACID-safe          |
+| Analytics readiness  | Limited            | Query-ready        |
+
+---
+
+# Known Limitations
+
+* Browser tab detection only tracks window titles
+* Idle detection on macOS is basic
 * No GUI dashboard
-* Chrome-only browser tracking
-* Linux support depends on X11
-* Background service mode not implemented
-* Limited error handling
+* No analytics interface
+* No auto-startup integration
+* No activity classification
 
 ---
 
-## Future Improvements
+# Future Improvements
 
-* Idle time detection
-* GUI dashboard with charts
-* Multi-browser support
-* Productivity scoring
-* Background service/daemon mode
+* Browser tab deep tracking
+* Analytics dashboard with charts
+* Productivity scoring AI
 * Weekly & monthly reports
-* Database storage instead of JSON
-* Export to CSV / Excel
-* Notifications & reminders
+* Automatic startup service integration
+* Activity classification (productive vs unproductive)
+* Screenshot sampling
+* Multi-device sync
+* Privacy filters
+* Web dashboard
 
 ---
 
-## Contributing
+# Contributing
 
 Pull requests and feature suggestions are welcome.
 
 ---
 
-## License
+# License
 
 MIT License
